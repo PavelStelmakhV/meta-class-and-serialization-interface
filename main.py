@@ -1,8 +1,49 @@
-# Домашнее задание
-# Напишите классы сериализации контейнеров с данными Python в json, bin файлы. Сами классы должны соответствовать
-# общему интерфейсу (абстрактному базовому классу) SerializationInterface.
-# Напишите класс метакласс Meta, который всем классам, для кого он будет метаклассом, устанавливает порядковый номер.
-# Код для проверки правильности решения:
+from abc import ABCMeta, abstractmethod
+from pathlib import Path
+import pickle
+import json
+
+
+class SerializationInterface(metaclass=ABCMeta):
+    @abstractmethod
+    def __init__(self, filename: Path):
+        ...
+
+    @abstractmethod
+    def load(self):
+        ...
+
+    @abstractmethod
+    def dump(self, data):
+        ...
+
+
+class SerializationPickle(SerializationInterface):
+    def __init__(self, filename: Path='data.bin'):
+        self.filename = filename
+
+    def load(self):
+        with open(self.filename, "rb") as fh:
+            unpacked = pickle.load(fh)
+        return unpacked
+
+    def dump(self, data):
+        with open(self.filename, "wb") as fh:
+            pickle.dump(data, fh)
+
+
+class SerializationJson(SerializationInterface):
+    def __init__(self, filename: Path = 'data.json'):
+        self.filename = filename
+
+    def load(self):
+        with open(self.filename, "r") as fh:
+            unpacked = json.load(fh)
+        return unpacked
+
+    def dump(self, data):
+        with open(self.filename, "w") as fh:
+            json.dump(data, fh)
 
 
 class Meta(type):
@@ -40,3 +81,4 @@ if __name__ == '__main__':
     assert (Cls1.class_number, Cls2.class_number) == (0, 1)
     a, b = Cls1(''), Cls2('')
     assert (a.class_number, b.class_number) == (0, 1)
+
